@@ -1,23 +1,13 @@
 import React from "react";
 import ProjectNotFound from "./not-found";
 
-interface ProjectPageProps {
+interface PageProps {
   params: {
     projectId: string;
   };
 }
 
-async function getData() {
-  // Explicitly set cache behavior
-  const res = await fetch("https://api.example.com/data", {
-    cache: "force-cache", // or 'no-store' for dynamic data
-  });
-  return res.json();
-}
-
-export default async function ProjectPage({ params }: ProjectPageProps) {
-  const data = await getData();
-
+export default async function ProjectPage({ params }: PageProps) {
   if (params.projectId != "123") {
     return <ProjectNotFound />;
   }
