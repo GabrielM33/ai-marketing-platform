@@ -1,15 +1,15 @@
-import React from "react";
-import ProjectNotFound from "./not-found";
+import { notFound } from "next/navigation";
 
-interface PageProps {
+type Props = {
   params: {
     projectId: string;
   };
-}
+  searchParams?: { [key: string]: string | string[] | undefined };
+};
 
-export default async function ProjectPage({ params }: PageProps) {
+export default function ProjectPage({ params }: Props) {
   if (params.projectId != "123") {
-    return <ProjectNotFound />;
+    return notFound();
   }
 
   return <div>Project Page: {params.projectId}</div>;
