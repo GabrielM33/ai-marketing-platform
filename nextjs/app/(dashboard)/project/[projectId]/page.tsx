@@ -7,7 +7,15 @@ type Props = {
   searchParams?: { [key: string]: string | string[] | undefined };
 };
 
-export default function ProjectPage({ params }: Props) {
+export async function generateStaticParams() {
+  const projects = ["123", "456", "789"];
+
+  return projects.map((projectId) => ({
+    projectId: projectId,
+  }));
+}
+
+export default async function ProjectPage({ params }: Props) {
   if (params.projectId != "123") {
     return notFound();
   }
