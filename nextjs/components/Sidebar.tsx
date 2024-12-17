@@ -1,5 +1,13 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
-import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs";
+"use client";
+
+import { Folders, LayoutTemplate, Settings } from "lucide-react";
+import {
+  SignedIn,
+  SignedOut,
+  UserButton,
+  SignInButton,
+  useUser,
+} from "@clerk/nextjs";
 
 import {
   Sidebar,
@@ -10,43 +18,37 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 // Menu items.
 const items = [
   {
-    title: "Home",
-    url: "#",
-    icon: Home,
+    title: "Projects",
+    url: "/projects",
+    icon: Folders,
   },
   {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
+    title: "Templates",
+    url: "/templates",
+    icon: LayoutTemplate,
   },
   {
     title: "Settings",
-    url: "#",
+    url: "/settings",
     icon: Settings,
   },
 ];
 
 export function AppSidebar() {
+  const { state } = useSidebar();
+  const { user } = useUser();
+
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupLabel>AI Marketing Platform</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
@@ -63,7 +65,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <div className="px-4 py-2">
+      <div className="px-4 py-2 pb-6">
         <SignedOut>
           <SignInButton mode="modal">
             <button className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
@@ -72,7 +74,16 @@ export function AppSidebar() {
           </SignInButton>
         </SignedOut>
         <SignedIn>
-          <UserButton afterSignOutUrl="/" />
+          <div className="flex items-center gap-3">
+            <UserButton afterSignOutUrl="/" />
+            {state === "expanded" && user && (
+              <span className="text-sm text-sidebar-foreground truncate">
+                {user.fullName ||
+                  user.username ||
+                  user.primaryEmailAddress?.emailAddress}
+              </span>
+            )}
+          </div>
         </SignedIn>
       </div>
     </Sidebar>
