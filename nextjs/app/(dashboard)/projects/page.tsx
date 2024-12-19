@@ -1,14 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { getProjectsForUser } from "@/server/queries";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import React from "react";
 import { createProject } from "@/server/mutations";
+import ProjectList from "@/components/ProjectList";
 
 type Project = {
   id: string;
@@ -30,24 +25,8 @@ export default async function ProjectsPage() {
       <form action={createProject}>
         <Button type="submit">Create Project</Button>
       </form>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects?.map((project) => (
-          <Card key={project.id}>
-            <CardHeader>
-              <CardTitle>{project.title}</CardTitle>
-              {project.description && (
-                <CardDescription>{project.description}</CardDescription>
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm text-gray-500">
-                Last updated:{" "}
-                {new Date(project.updated_at).toLocaleDateString()}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+
+      <ProjectList projects={projects} />
 
       {projects?.length === 0 && (
         <Card className="mt-8">
