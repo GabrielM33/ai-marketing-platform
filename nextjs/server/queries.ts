@@ -77,3 +77,43 @@ export async function getProjectsForUser() {
 
   return projects || [];
 }
+
+export async function getProject(projectId: string) {
+  // Get authenticated user from Clerk auth
+  const { userId } = await auth();
+
+  // Verify user exists in database
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  // First, get the Supabase user mapping
+  const { data: userMapping } = await supabase
+    .from("users")
+    .select("id")
+    .eq("clerk_id", userId)
+    .single();
+
+  if (!userMapping) {
+    throw new Error("User mapping not found");
+  }
+
+  // First check if the project exists
+  const { data: project, error } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("id", projectId)
+    .single();
+
+  // Return null if project doesn't exist
+  if (error || !project) {
+    return null;
+  }
+
+  // Then verify if the user has access to it
+  if (project.user_id !== userMapping.id) {
+    throw new Error("You don't have permission to view this project");
+  }
+
+  return project;
+}
