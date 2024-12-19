@@ -1,17 +1,11 @@
-import { notFound } from "next/navigation";
-
 type Props = {
-  params: Promise<{
-    projectId: string;
-  }>;
+  params: {
+    project: string;
+  };
 };
 
-export default async function ProjectPage({ params }: Props) {
-  const resolvedParams = await params;
-
-  if (resolvedParams.projectId != "123") {
-    return notFound();
-  }
-
-  return <div>Project Page: {resolvedParams.projectId}</div>;
+export default async function ProjectPage({}: Props) {
+  // TODO: Make a query to the db to grab the project with the projectId
+  // TODO: Pass project to our children components
+  // TODO: If not found, return 404 page
 }
