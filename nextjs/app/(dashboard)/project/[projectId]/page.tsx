@@ -1,11 +1,23 @@
-type Props = {
+import ProjectDetailView from "@/components/ProjectDetailView";
+import { getProject } from "@/server/queries";
+import { notFound } from "next/navigation";
+
+type ProjectPageProps = {
   params: {
-    project: string;
+    projectId: string;
   };
 };
 
-export default async function ProjectPage({}: Props) {
-  // TODO: Make a query to the db to grab the project with the projectId
-  // TODO: Pass project to our children components
-  // TODO: If not found, return 404 page
+export default async function ProjectPage({ params }: ProjectPageProps) {
+  const project = await getProject(params.projectId);
+
+  if (!project) {
+    return notFound();
+  }
+
+  return (
+    <div>
+      <ProjectDetailView project={project} />
+    </div>
+  );
 }
