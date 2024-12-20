@@ -10,7 +10,6 @@ type ProjectPageProps = {
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const project = await getProject(params.projectId);
-  await new Promise((resolve) => setTimeout(resolve, 2000));
 
   if (!project) {
     return notFound();
