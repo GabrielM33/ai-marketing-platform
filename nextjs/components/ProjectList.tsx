@@ -9,7 +9,7 @@ import {
 import Link from "next/link";
 import { getTimeAgo } from "@/utils/timeUtils";
 
-type Project = {
+export type Project = {
   id: string;
   title: string;
   description: string;
