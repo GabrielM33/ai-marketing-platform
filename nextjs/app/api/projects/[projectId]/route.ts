@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
-import zod from "zod";
+import { z } from "zod";
 
-const updateProjectSchema = zod.object({
-  title: zod.string().min(1),
+const updateProjectSchema = z.object({
+  title: z.string().min(1),
 });
 
 // Initialize Supabase client
