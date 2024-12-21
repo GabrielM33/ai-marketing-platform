@@ -9,15 +9,20 @@ type ProjectPageProps = {
 };
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
-  const project = await getProject(params.projectId);
+  try {
+    const project = await getProject(params.projectId);
 
-  if (!project) {
-    return notFound();
+    if (!project) {
+      return notFound();
+    }
+
+    return (
+      <div>
+        <ProjectDetailView project={project} />
+      </div>
+    );
+  } catch (error) {
+    console.error("Error fetching project:", error);
+    throw error;
   }
-
-  return (
-    <div>
-      <ProjectDetailView project={project} />
-    </div>
-  );
 }
