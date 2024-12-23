@@ -39,26 +39,7 @@ BEFORE UPDATE ON projects
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
 
--- create assets table
-CREATE TABLE IF NOT EXISTS assets (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    project_id UUID NOT NULL,
-    title TEXT NOT NULL,
-    file_name TEXT NOT NULL,
-    file_url TEXT NOT NULL,
-    file_type TEXT NOT NULL,
-    mime_type TEXT NOT NULL,
-    size INT NOT NULL,
-);
-
--- create asset processing jobs table
-CREATE TABLE IF NOT EXISTS asset_processing_jobs (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    asset_id UUID NOT NULL,
-    status TEXT NOT NULL,
-);
-
-
+-- Create assets table with proper structure
 CREATE TABLE assets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     project_id UUID NOT NULL,
@@ -75,6 +56,7 @@ CREATE TABLE assets (
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
 
+-- Create asset processing jobs table with proper structure
 CREATE TABLE asset_processing_jobs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     asset_id UUID NOT NULL UNIQUE,
