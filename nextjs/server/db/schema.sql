@@ -38,3 +38,72 @@ CREATE TRIGGER trigger_set_updated_at
 BEFORE UPDATE ON projects
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+
+-- create assets table
+CREATE TABLE IF NOT EXISTS assets (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    project_id UUID NOT NULL,
+    title TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    file_url TEXT NOT NULL,
+    file_type TEXT NOT NULL,
+    mime_type TEXT NOT NULL,
+    size INT NOT NULL,
+);
+
+-- create asset processing jobs table
+CREATE TABLE IF NOT EXISTS asset_processing_jobs (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    asset_id UUID NOT NULL,
+    status TEXT NOT NULL,
+);
+
+
+CREATE TABLE assets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    project_id UUID NOT NULL,
+    title TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    file_url TEXT NOT NULL,
+    file_type VARCHAR(50) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    size BIGINT NOT NULL,
+    content TEXT DEFAULT '',
+    token_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
+CREATE TABLE asset_processing_jobs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    asset_id UUID NOT NULL UNIQUE,
+    project_id UUID NOT NULL,
+    status TEXT NOT NULL,
+    error_message TEXT,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    last_heart_beat TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
+-- Add trigger for updating the updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_assets_updated_at
+    BEFORE UPDATE ON assets
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_asset_processing_jobs_updated_at
+    BEFORE UPDATE ON asset_processing_jobs
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
