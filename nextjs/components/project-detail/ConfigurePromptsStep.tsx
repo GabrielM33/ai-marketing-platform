@@ -1,5 +1,7 @@
 import React from "react";
 
-export default function ConfigurePromptsStep() {
+function ConfigurePromptsStep() {
   return <div>ConfigurePromptsStep</div>;
 }
+
+export default ConfigurePromptsStep;
