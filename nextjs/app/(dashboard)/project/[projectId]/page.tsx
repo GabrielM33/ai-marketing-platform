@@ -3,14 +3,13 @@ import { getProject } from "@/server/queries";
 import { notFound } from "next/navigation";
 import React from "react";
 
-interface ProjectPageProps {
-  params: {
-    projectId: string;
-  };
-}
+type Props = {
+  params: Promise<{ projectId: string }>;
+};
 
-export default async function ProjectPage({ params }: ProjectPageProps) {
-  const project = await getProject(params.projectId);
+export default async function ProjectPage({ params }: Props) {
+  const { projectId } = await params;
+  const project = await getProject(projectId);
 
   if (!project) {
     return notFound();
