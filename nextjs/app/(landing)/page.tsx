@@ -4,7 +4,7 @@ import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import Hero from "@/components/landing-page/Hero";
+// import Hero from "@/components/landing-page/Hero";
 
 export default function LandingPage() {
   const { isSignedIn } = useAuth();
@@ -22,7 +22,7 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-gray-50">
-      <Hero />
+      {/*<Hero /> */}
       <div className="space-x-4">
         <SignInButton mode="modal">
           <Button variant="default">Sign in</Button>

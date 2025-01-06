@@ -1,29 +1,24 @@
-import ProjectDetailView from "@/components/ProjectDetailView";
+import ProjectDetailView from "@/components/project-detail/ProjectDetailView";
 import { getProject } from "@/server/queries";
-import { notFound } from "next/dist/client/components/not-found";
+import { notFound } from "next/navigation";
+import React from "react";
 
-type Params = Promise<{ projectId: string }>;
+interface ProjectPageProps {
+  params: {
+    projectId: string;
+  };
+}
 
-type ProjectPageProps = {
-  params: Params;
-};
+export default async function ProjectPage({ params }: ProjectPageProps) {
+  const project = await getProject(params.projectId);
 
-export default async function ProjectPage(props: ProjectPageProps) {
-  try {
-    const params = await props.params;
-    const project = await getProject(params.projectId);
-
-    if (!project) {
-      notFound();
-    }
-
-    return (
-      <div>
-        <ProjectDetailView project={project} />
-      </div>
-    );
-  } catch (error) {
-    console.error("Error fetching project:", error);
-    throw error;
+  if (!project) {
+    return notFound();
   }
+
+  return (
+    <div className="mt-2">
+      <ProjectDetailView project={project} />
+    </div>
+  );
 }
