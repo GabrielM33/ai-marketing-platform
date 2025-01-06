@@ -15,9 +15,9 @@ const supabase = createClient(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  context: { params: Promise<{ projectId: string }> }
 ) {
-  // TODO: check to make sure the user us authorized to edit thso project
+  const { projectId } = await context.params;
 
   const { userId } = getAuth(request);
   if (!userId) {
@@ -49,7 +49,7 @@ export async function PATCH(
   const { data: updatedProject, error } = await supabase
     .from("projects")
     .update({ title: validatedData.data.title })
-    .eq("id", params.projectId)
+    .eq("id", projectId)
     .eq("user_id", userMapping.id)
     .select()
     .single();
@@ -64,10 +64,6 @@ export async function PATCH(
   if (!updatedProject) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
-
-  // TODO: return the updated project
-
-  // TODO: handle errors
 
   return NextResponse.json(updatedProject);
 }
