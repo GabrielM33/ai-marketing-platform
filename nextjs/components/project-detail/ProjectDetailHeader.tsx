@@ -1,18 +1,13 @@
-import React, { SetStateAction, Dispatch, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "../ui/input";
+"use client";
+
+import { Project } from "@/server/db/schema";
+import React, { Dispatch, SetStateAction, useState } from "react";
+import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
 import { CheckIcon, SquarePen, Trash2, X } from "lucide-react";
+import { Input } from "../ui/input";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { cn } from "@/lib/utils";
-
-interface Project {
-  id: string;
-  title: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-}
 
 interface ProjectDetailHeaderProps {
   project: Project;
@@ -23,6 +18,7 @@ function ProjectDetailHeader({
   project,
   setShowDeleteConfirmation,
 }: ProjectDetailHeaderProps) {
+  console.log("ProjectDetailHeader", project);
   const [title, setTitle] = useState(project.title);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -38,13 +34,14 @@ function ProjectDetailHeader({
       setTitle(response.data.title);
       toast.success("Project title updated successfully");
     } catch (error) {
-      const defaultMessage = "Failed to update project title, please try again";
+      const defaultMessage =
+        "Failed to update project title. Please try again.";
 
       console.error(error);
 
       if (axios.isAxiosError(error)) {
         console.log("IS AXIOS ERROR", error.response?.data);
-        const errorMessages = error.response?.data.error.map(
+        const errorMessages = error.response?.data?.error?.map(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (detail: any) => detail?.message
         ) ?? [defaultMessage];
@@ -53,8 +50,6 @@ function ProjectDetailHeader({
       } else {
         toast.error(defaultMessage);
       }
-
-      setTitle(project.title);
     } finally {
       setIsEditing(false);
     }
@@ -72,7 +67,7 @@ function ProjectDetailHeader({
         {/* ACTION BUTTONS */}
         <Button
           onClick={handleTitleSubmit}
-          className="h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0 bg-green-100 text-black hover:bg-red-200 flex items-center justify-center"
+          className="h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0 bg-green-100 text-green-600 hover:bg-green-200 flex items-center justify-center"
         >
           <CheckIcon className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
@@ -81,7 +76,7 @@ function ProjectDetailHeader({
             setIsEditing(false);
             setTitle(project.title);
           }}
-          className="h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0 bg-red-100 text-black hover:bg-red-200 flex items-center justify-center"
+          className="h-8 w-8 sm:h-10 sm:w-10 rounded-full p-0 bg-red-100 text-red-500 hover:bg-red-200 flex items-center justify-center"
         >
           <X className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
