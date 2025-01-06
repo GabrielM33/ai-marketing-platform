@@ -4,9 +4,9 @@ import { createClient } from "@/server/supabase/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  context: { params: Promise<{ projectId: string }> }
 ) {
-  const { projectId } = params;
+  const { projectId } = await context.params;
 
   // Auth check
   const { userId } = await auth();
