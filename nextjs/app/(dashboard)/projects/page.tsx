@@ -1,7 +1,7 @@
 import ProjectList from "@/components/ProjectList";
 import { Button } from "@/components/ui/button";
-import { createProject } from "@/server/mutations";
-import { getProjectsForUser } from "@/server/queries";
+import { createProject } from "@/db/mutations";
+import { getProjectsForUser } from "@/db/queries";
 import { Plus } from "lucide-react";
 import React from "react";
 

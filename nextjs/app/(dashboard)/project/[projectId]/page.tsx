@@ -1,5 +1,5 @@
 import ProjectDetailView from "@/components/project-detail/ProjectDetailView";
-import { getProject } from "@/server/queries";
+import { getProject } from "@/db/queries";
 import { notFound } from "next/navigation";
 import React from "react";
 

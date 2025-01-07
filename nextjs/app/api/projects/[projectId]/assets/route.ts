@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/server/supabase/server";
+import { createClient } from "@/db/supabase";
 
 export async function GET(
   request: NextRequest,
