@@ -1,4 +1,4 @@
-import { Project } from "@/server/db/schema";
+import { Project } from "@/db/schema";
 import React from "react";
 import { Card, CardHeader, CardTitle } from "./ui/card";
 import Link from "next/link";
