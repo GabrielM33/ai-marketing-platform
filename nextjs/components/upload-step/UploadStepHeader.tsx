@@ -75,7 +75,7 @@ function UploadStepHeader({
             <Button
               onClick={handleUpload}
               disabled={uploading}
-              className="mt-4 bg-main text-white round-3xl text-sm"
+              className="mt-4 bg-main text-main hover:bg-main/70 rounded-3xl text-sm"
             >
               <Upload className="h-4 w-4 sm:h-5 sm:w-5 mr-1" />
               {uploading ? "Uploading..." : "Upload Files"}
