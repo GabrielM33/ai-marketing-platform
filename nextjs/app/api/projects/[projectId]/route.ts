@@ -5,28 +5,19 @@ import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-// Schema validation for project updates
 const updateProjectSchema = z.object({
   title: z.string().min(1),
 });
 
-/**
- * PATCH /api/projects/[projectId]
- * Updates a project's title
- * Requires user authentication via Clerk
- * Validates input using Zod schema
- */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { projectId: string } }
 ) {
-  // Verify user authentication using Clerk
   const { userId } = getAuth(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Parse and validate request body
   const body = await request.json();
   const validatedData = updateProjectSchema.safeParse(body);
 
@@ -39,7 +30,6 @@ export async function PATCH(
 
   const { title } = validatedData.data;
 
-  // Update project title in database, ensuring user owns the project
   const updatedProject = await db
     .update(projectsTable)
     .set({ title })
@@ -58,23 +48,15 @@ export async function PATCH(
   return NextResponse.json(updatedProject[0]);
 }
 
-/**
- * DELETE /api/projects/[projectId]
- * Deletes a specific project
- * Requires user authentication via Clerk
- * Only allows deletion if user owns the project
- */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { projectId: string } }
 ) {
-  // Verify user authentication using Clerk
   const { userId } = getAuth(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Delete project from database, ensuring user owns the project
   const deletedProject = await db
     .delete(projectsTable)
     .where(
