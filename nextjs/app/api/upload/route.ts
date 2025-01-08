@@ -100,9 +100,10 @@ export async function POST(request: Request): Promise<NextResponse> {
         path: uploadData.path,
       });
     } catch (error) {
-      throw new Error(
-        "Could not save asset or asset processing job to database"
-      );
+      // Clean up the uploaded file if database operations fail
+      await supabase.storage.from("assets").remove([uploadData.path]);
+
+      throw error;
     }
   } catch (error) {
     return NextResponse.json(
