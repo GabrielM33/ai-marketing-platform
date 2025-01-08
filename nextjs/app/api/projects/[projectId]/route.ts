@@ -1,29 +1,32 @@
-import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/db";
+import { projectsTable } from "@/db/schema";
 import { getAuth } from "@clerk/nextjs/server";
-import { createClient } from "@supabase/supabase-js";
+import { and, eq } from "drizzle-orm";
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+// Schema validation for project updates
 const updateProjectSchema = z.object({
   title: z.string().min(1),
 });
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
+/**
+ * PATCH /api/projects/[projectId]
+ * Updates a project's title
+ * Requires user authentication via Clerk
+ * Validates input using Zod schema
+ */
 export async function PATCH(
   request: NextRequest,
-  context: { params: Promise<{ projectId: string }> }
+  { params }: { params: { projectId: string } }
 ) {
-  const { projectId } = await context.params;
-
+  // Verify user authentication using Clerk
   const { userId } = getAuth(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Parse and validate request body
   const body = await request.json();
   const validatedData = updateProjectSchema.safeParse(body);
 
@@ -34,36 +37,57 @@ export async function PATCH(
     );
   }
 
-  // Get the Supabase user mapping first
-  const { data: userMapping } = await supabase
-    .from("users")
-    .select("id")
-    .eq("clerk_id", userId)
-    .single();
+  const { title } = validatedData.data;
 
-  if (!userMapping) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
-  }
+  // Update project title in database, ensuring user owns the project
+  const updatedProject = await db
+    .update(projectsTable)
+    .set({ title })
+    .where(
+      and(
+        eq(projectsTable.userId, userId),
+        eq(projectsTable.id, params.projectId)
+      )
+    )
+    .returning();
 
-  // Update the project
-  const { data: updatedProject, error } = await supabase
-    .from("projects")
-    .update({ title: validatedData.data.title })
-    .eq("id", projectId)
-    .eq("user_id", userMapping.id)
-    .select()
-    .single();
-
-  if (error) {
-    return NextResponse.json(
-      { error: "Failed to update project" },
-      { status: 500 }
-    );
-  }
-
-  if (!updatedProject) {
+  if (updatedProject.length === 0) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
-  return NextResponse.json(updatedProject);
+  return NextResponse.json(updatedProject[0]);
+}
+
+/**
+ * DELETE /api/projects/[projectId]
+ * Deletes a specific project
+ * Requires user authentication via Clerk
+ * Only allows deletion if user owns the project
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { projectId: string } }
+) {
+  // Verify user authentication using Clerk
+  const { userId } = getAuth(request);
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Delete project from database, ensuring user owns the project
+  const deletedProject = await db
+    .delete(projectsTable)
+    .where(
+      and(
+        eq(projectsTable.userId, userId),
+        eq(projectsTable.id, params.projectId)
+      )
+    )
+    .returning();
+
+  if (deletedProject.length === 0) {
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(deletedProject[0]);
 }
