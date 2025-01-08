@@ -9,13 +9,11 @@ const updateProjectSchema = z.object({
   title: z.string().min(1),
 });
 
-type RouteParams = {
-  params: {
-    projectId: string;
-  };
-};
-
-export async function PATCH(request: NextRequest, context: RouteParams) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ projectId: string }> }
+) {
+  const { projectId } = await params;
   const { userId } = getAuth(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -37,10 +35,7 @@ export async function PATCH(request: NextRequest, context: RouteParams) {
     .update(projectsTable)
     .set({ title })
     .where(
-      and(
-        eq(projectsTable.userId, userId),
-        eq(projectsTable.id, context.params.projectId)
-      )
+      and(eq(projectsTable.userId, userId), eq(projectsTable.id, projectId))
     )
     .returning();
 
@@ -51,7 +46,11 @@ export async function PATCH(request: NextRequest, context: RouteParams) {
   return NextResponse.json(updatedProject[0]);
 }
 
-export async function DELETE(request: NextRequest, context: RouteParams) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ projectId: string }> }
+) {
+  const { projectId } = await params;
   const { userId } = getAuth(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -60,10 +59,7 @@ export async function DELETE(request: NextRequest, context: RouteParams) {
   const deletedProject = await db
     .delete(projectsTable)
     .where(
-      and(
-        eq(projectsTable.userId, userId),
-        eq(projectsTable.id, context.params.projectId)
-      )
+      and(eq(projectsTable.userId, userId), eq(projectsTable.id, projectId))
     )
     .returning();
 
