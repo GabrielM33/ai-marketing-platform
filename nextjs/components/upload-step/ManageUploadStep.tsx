@@ -7,7 +7,6 @@ import ConfirmationModal from "../ConfirmationModal";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Asset, AssetProcessingJob } from "@/db/schema";
-import { upload } from "@vercel/blob/client";
 
 interface ManageUploadStepProps {
   projectId: string;
@@ -41,6 +40,7 @@ function ManageUploadStep({ projectId }: ManageUploadStepProps) {
       console.log("Uploaded assets", response.data);
     } catch (error) {
       console.error("Failed to fetch assets", error);
+      toast.error("Failed to fetch assets");
     } finally {
       setIsLoading(false);
     }
@@ -104,45 +104,65 @@ function ManageUploadStep({ projectId }: ManageUploadStepProps) {
   };
 
   const handleUpload = async () => {
-    // check if files are uploaded
     setUploading(true);
+    const failedUploads: string[] = [];
 
     try {
-      // upload files
       const uploadPromises = browserFiles.map(async (file) => {
-        const fileData = {
-          projectId,
-          title: file.name,
-          fileType: getFileType(file),
-          mimeType: file.type,
-          size: file.size,
-        };
+        try {
+          // Convert file to base64
+          const fileBuffer = await file.arrayBuffer();
+          const fileBase64 = Buffer.from(fileBuffer).toString("base64");
 
-        const filename = `${projectId}/${file.name}`;
-        const result = await upload(filename, file, {
-          access: "public",
-          handleUploadUrl: "/api/upload",
-          multipart: true,
-          clientPayload: JSON.stringify(fileData),
-        });
+          const response = await axios.post("/api/upload", {
+            projectId,
+            fileType: getFileType(file),
+            mimeType: file.type,
+            size: file.size,
+            file: fileBase64,
+            filename: file.name,
+          });
 
-        return result;
+          return response.data;
+        } catch (error) {
+          console.error(`Failed to upload ${file.name}:`, error);
+          failedUploads.push(file.name);
+          return null;
+        }
       });
 
-      const uploadResults = await Promise.all(uploadPromises);
+      const results = await Promise.all(uploadPromises);
+      const successfulUploads = results.filter(Boolean);
 
-      // Fetch assets
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await fetchAssets();
+      // Show appropriate toast messages
+      if (successfulUploads.length > 0) {
+        toast.success(
+          `Successfully uploaded ${successfulUploads.length} file${
+            successfulUploads.length > 1 ? "s" : ""
+          }`
+        );
+      }
+      if (failedUploads.length > 0) {
+        toast.error(
+          `Failed to upload ${failedUploads.length} file${
+            failedUploads.length > 1 ? "s" : ""
+          }`
+        );
+      }
 
-      toast.success(`Successfully uploaded ${uploadResults.length} files`);
-      setBrowserFiles([]);
-      if (inputFileRef.current) {
-        inputFileRef.current.value = "";
+      // Clear the file input only if at least one file was uploaded successfully
+      if (successfulUploads.length > 0) {
+        setBrowserFiles([]);
+        if (inputFileRef.current) {
+          inputFileRef.current.value = "";
+        }
+        // Fetch updated assets
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await fetchAssets();
       }
     } catch (error) {
       console.error("Error in upload process:", error);
-      toast.error("Failed to upload one or more files. Please try again.");
+      toast.error("Failed to upload files. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -157,7 +177,7 @@ function ManageUploadStep({ projectId }: ManageUploadStepProps) {
       toast.success("Asset deleted successfully");
       fetchAssets();
     } catch (error) {
-      console.error("Failed to delete project", error);
+      console.error("Failed to delete asset", error);
       toast.error("Failed to delete asset. Please try again.");
     } finally {
       setIsDeleting(false);
