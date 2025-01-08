@@ -9,10 +9,13 @@ const updateProjectSchema = z.object({
   title: z.string().min(1),
 });
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+type RouteParams = {
+  params: {
+    projectId: string;
+  };
+};
+
+export async function PATCH(request: NextRequest, context: RouteParams) {
   const { userId } = getAuth(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -36,7 +39,7 @@ export async function PATCH(
     .where(
       and(
         eq(projectsTable.userId, userId),
-        eq(projectsTable.id, params.projectId)
+        eq(projectsTable.id, context.params.projectId)
       )
     )
     .returning();
@@ -48,10 +51,7 @@ export async function PATCH(
   return NextResponse.json(updatedProject[0]);
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function DELETE(request: NextRequest, context: RouteParams) {
   const { userId } = getAuth(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -62,7 +62,7 @@ export async function DELETE(
     .where(
       and(
         eq(projectsTable.userId, userId),
-        eq(projectsTable.id, params.projectId)
+        eq(projectsTable.id, context.params.projectId)
       )
     )
     .returning();
