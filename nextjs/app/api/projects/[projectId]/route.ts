@@ -66,11 +66,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  {
-    params,
-  }: { params: { projectId: string } } & {
-    searchParams: { [key: string]: string | string[] | undefined };
-  }
+  { params }: { params: { projectId: string } }
 ) {
   // Verify user authentication using Clerk
   const { userId } = getAuth(request);
