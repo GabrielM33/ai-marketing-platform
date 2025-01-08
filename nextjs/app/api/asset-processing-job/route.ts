@@ -4,6 +4,7 @@ import { eq, inArray } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+// Schema validation for updating asset processing jobs
 const updateAssetJobSchema = z.object({
   status: z
     .enum([
@@ -19,10 +20,17 @@ const updateAssetJobSchema = z.object({
   lastHeartBeat: z.string().optional(),
 });
 
+/**
+ * GET /api/asset-processing-job
+ * Retrieves all asset processing jobs that are not in a terminal state
+ * Used by the worker service to find jobs that need processing
+ * No authentication required as this is a secure route protected by middleware
+ */
 export async function GET() {
   console.log("Fetching asset processing job that are not in a terminal state");
 
   try {
+    // Query jobs that are in non-terminal states (created, failed, or in_progress)
     const availableJobs = await db
       .select()
       .from(assetProcessingJobTable)
@@ -45,8 +53,15 @@ export async function GET() {
   }
 }
 
+/**
+ * PATCH /api/asset-processing-job?jobId={id}
+ * Updates the status and metadata of an asset processing job
+ * Used by the worker service to update job progress and status
+ * No authentication required as this is a secure route protected by middleware
+ */
 export async function PATCH(request: NextRequest) {
   try {
+    // Extract jobId from query parameters
     const { searchParams } = new URL(request.url);
     const jobId = searchParams.get("jobId");
 
@@ -57,6 +72,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Validate request body against schema
     const body = await request.json();
     const validationResult = updateAssetJobSchema.safeParse(body);
 
@@ -73,6 +89,7 @@ export async function PATCH(request: NextRequest) {
     const { status, errorMessage, attempts, lastHeartBeat } =
       validationResult.data;
 
+    // Update job status and metadata in database
     const updatedJob = await db
       .update(assetProcessingJobTable)
       .set({
