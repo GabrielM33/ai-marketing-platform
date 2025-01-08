@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 
 // Initialize Supabase client
@@ -10,79 +9,93 @@ const supabase = createClient(
 );
 
 export async function POST(request: Request): Promise<NextResponse> {
-  const body = (await request.json()) as HandleUploadBody;
-
   try {
-    const jsonResponse = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
-        const { userId } = await auth();
-        if (!userId) {
-          return {};
-        }
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-        return {
-          allowedContentTypes: [
-            "video/mp4",
-            "video/quicktime",
-            "audio/mpeg",
-            "audio/wav",
-            "audio/ogg",
-            "text/plain",
-            "text/markdown",
-          ],
-          maximumSize: 2 * 1024 * 1024 * 1024, // 2GB
-          tokenPayload: clientPayload,
-        };
-      },
-      onUploadCompleted: async ({ blob, tokenPayload }) => {
-        if (!tokenPayload) return;
+    const { projectId, fileType, mimeType, size, file, filename } =
+      await request.json();
 
-        const { projectId, fileType, mimeType, size } =
-          JSON.parse(tokenPayload);
+    // Validate file type
+    const allowedTypes = [
+      "video/mp4",
+      "video/quicktime",
+      "audio/mpeg",
+      "audio/wav",
+      "audio/ogg",
+      "text/plain",
+      "text/markdown",
+    ];
 
-        console.log(
-          `Saving blob URL ${blob.url} to database for project ${projectId} with filename ${blob.pathname}`
-        );
+    if (!allowedTypes.includes(mimeType)) {
+      return NextResponse.json(
+        { error: "File type not allowed" },
+        { status: 400 }
+      );
+    }
 
-        try {
-          // Insert into assets table
-          const { data: newAsset, error: assetError } = await supabase
-            .from("assets")
-            .insert({
-              project_id: projectId,
-              title: blob.pathname.split("/").pop() || blob.pathname,
-              file_name: blob.pathname,
-              file_url: blob.url,
-              file_type: fileType,
-              mime_type: mimeType,
-              size: size,
-            })
-            .select()
-            .single();
+    // Validate file size (2GB max)
+    if (size > 2 * 1024 * 1024 * 1024) {
+      return NextResponse.json({ error: "File too large" }, { status: 400 });
+    }
 
-          if (assetError) throw assetError;
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("assets")
+      .upload(`${projectId}/${filename}`, Buffer.from(file), {
+        contentType: mimeType,
+        upsert: false,
+      });
 
-          // Insert into asset_processing_jobs table
-          const { error: jobError } = await supabase
-            .from("asset_processing_jobs")
-            .insert({
-              asset_id: newAsset.id,
-              project_id: projectId,
-              status: "created",
-            });
+    if (uploadError) {
+      throw uploadError;
+    }
 
-          if (jobError) throw jobError;
-        } catch {
-          throw new Error(
-            "Could not save asset or asset processing job to database"
-          );
-        }
-      },
-    });
+    // Get the public URL for the uploaded file
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("assets").getPublicUrl(uploadData.path);
 
-    return NextResponse.json(jsonResponse);
+    try {
+      // Insert into assets table
+      const { data: newAsset, error: assetError } = await supabase
+        .from("assets")
+        .insert({
+          project_id: projectId,
+          title: filename,
+          file_name: uploadData.path,
+          file_url: publicUrl,
+          file_type: fileType,
+          mime_type: mimeType,
+          size: size,
+        })
+        .select()
+        .single();
+
+      if (assetError) throw assetError;
+
+      // Insert into asset_processing_jobs table
+      const { error: jobError } = await supabase
+        .from("asset_processing_jobs")
+        .insert({
+          asset_id: newAsset.id,
+          project_id: projectId,
+          status: "created",
+        });
+
+      if (jobError) throw jobError;
+
+      return NextResponse.json({
+        url: publicUrl,
+        path: uploadData.path,
+      });
+    } catch (error) {
+      throw new Error(
+        "Could not save asset or asset processing job to database"
+      );
+    }
   } catch (error) {
     return NextResponse.json(
       { error: (error as Error).message },
