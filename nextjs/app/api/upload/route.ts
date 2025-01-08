@@ -2,14 +2,22 @@ import { createClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// Initialize Supabase client
+// Initialize Supabase client with service role for full access to storage
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+/**
+ * POST /api/upload
+ * Handles file uploads for assets
+ * Requires user authentication via Clerk
+ * Performs file validation, uploads to Supabase Storage,
+ * creates asset record, and initiates processing job
+ */
 export async function POST(request: Request): Promise<NextResponse> {
   try {
+    // Verify user authentication using Clerk
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,7 +26,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     const { projectId, fileType, mimeType, size, file, filename } =
       await request.json();
 
-    // Validate file type
+    // Validate file type against allowed MIME types
     const allowedTypes = [
       "video/mp4",
       "video/quicktime",
@@ -36,12 +44,12 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
 
-    // Validate file size (2GB max)
+    // Validate file size (max 2GB)
     if (size > 2 * 1024 * 1024 * 1024) {
       return NextResponse.json({ error: "File too large" }, { status: 400 });
     }
 
-    // Upload to Supabase Storage
+    // Upload file to Supabase Storage with project-specific path
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from("assets")
       .upload(`${projectId}/${filename}`, Buffer.from(file), {
@@ -53,13 +61,13 @@ export async function POST(request: Request): Promise<NextResponse> {
       throw uploadError;
     }
 
-    // Get the public URL for the uploaded file
+    // Get public URL for the uploaded file
     const {
       data: { publicUrl },
     } = supabase.storage.from("assets").getPublicUrl(uploadData.path);
 
     try {
-      // Insert into assets table
+      // Create new asset record in database
       const { data: newAsset, error: assetError } = await supabase
         .from("assets")
         .insert({
@@ -76,7 +84,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
       if (assetError) throw assetError;
 
-      // Insert into asset_processing_jobs table
+      // Create processing job for the new asset
       const { error: jobError } = await supabase
         .from("asset_processing_jobs")
         .insert({
