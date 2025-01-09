@@ -11,12 +11,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import ProjectDetailBody from "./ProjectDetailBody";
 
 const ManageUploadStep = lazy(() => import("../upload-step/ManageUploadStep"));
-const ConfigurePromptsStep = lazy(() => import("./ConfigurePromptsStep"));
+const ConfigurePromptStep = lazy(() => import("../ConfigurePromptStep"));
 const GenerateContentStep = lazy(() => import("./GenerateContentStep"));
 
 const steps = [
   { name: "Upload Media", tab: "upload", component: ManageUploadStep },
-  { name: "Prompts", tab: "prompts", component: ConfigurePromptsStep },
+  { name: "Prompts", tab: "prompts", component: ConfigurePromptStep },
   { name: "Generate", tab: "generate", component: GenerateContentStep },
 ];
 
