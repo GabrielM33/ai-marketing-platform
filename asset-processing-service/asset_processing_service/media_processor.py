@@ -2,6 +2,7 @@ import asyncio
 import os
 import shutil
 import tempfile
+import uuid
 
 import ffmpeg
 
@@ -125,3 +126,44 @@ async def convert_audio_to_mp3(input_path: str, output_path: str):
     except ffmpeg.Error as e:
         print(f"Error converting audio to MP3: {e.stderr.decode()}")
         raise
+
+
+async def extract_audio_and_split(
+    video_buffer: bytes, max_chunk_size_bytes: int, original_file_name: str
+):
+    temp_dir = os.path.join(os.getcwd(), "temp", str(uuid.uuid4()))
+    os.makedirs(temp_dir, exist_ok=True)
+
+    base_file_name = os.path.basename(original_file_name)
+    input_file = os.path.join(temp_dir, base_file_name)
+    file_name_without_ext = os.path.splitext(base_file_name)[0]
+    output_mp3 = os.path.join(temp_dir, f"{file_name_without_ext}.mp3")
+
+    try:
+        with open(input_file, "wb") as f:
+            f.write(video_buffer)
+
+        # Use ffmpeg-python instead of subprocess
+        stream = ffmpeg.input(input_file)
+        stream = ffmpeg.output(stream, output_mp3, acodec="libmp3lame", q=0, map="a")
+
+        # Run ffmpeg asynchronously
+        await asyncio.to_thread(
+            ffmpeg.run, stream, capture_stdout=True, capture_stderr=True
+        )
+
+        with open(output_mp3, "rb") as f:
+            mp3_buffer = f.read()
+        chunks = await split_audio_file(
+            mp3_buffer, max_chunk_size_bytes, f"{file_name_without_ext}.mp3"
+        )
+
+        return chunks
+
+    except Exception as e:
+        print(f"Error extracting audio and splitting: {e}")
+        raise
+
+    finally:
+        # Clean up temporary files
+        shutil.rmtree(temp_dir)
