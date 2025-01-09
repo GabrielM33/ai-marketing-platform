@@ -49,8 +49,8 @@ async def split_audio_file(
         # Calculate chunk duration
         chunk_duration = duration / num_chunks
 
-        logger.info("Total size: ", total_size)
-        logger.info("Duration: ", duration)
+        logger.info(f"Total size: {total_size}")
+        logger.info(f"Duration: {duration}")
         logger.info(
             f"Splitting into {num_chunks} chunks of {chunk_duration} seconds each."
         )
