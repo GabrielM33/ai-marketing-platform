@@ -29,7 +29,7 @@ async def fetch_jobs() -> List[AssetProcessingJob]:
                     return jobs
 
                 else:
-                    logger.error("Error fetching jobs: ", response.status)
+                    logger.error(f"Error fetching jobs: {response.status}")
                     return []
     except aiohttp.ClientError as error:
         logger.error(f"Error fetching jobs: {error}")
@@ -73,7 +73,7 @@ async def fetch_asset(asset_id: str) -> Optional[Asset]:
                     return None
 
                 else:
-                    logger.error("Error fetching asset: ", response.status)
+                    logger.error(f"Error fetching asset: {response.status}")
                     return None
     except aiohttp.ClientError as error:
         logger.error(f"Error fetching asset: {error}")
