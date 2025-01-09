@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import ConfirmationModal from "@/components/ConfirmationModal";
+//import ConfirmationModal from "@/components/ConfirmationModal";
 import ConfigurePromptStepHeader from "@/components/ConfigurePromptStepHeader";
 import { useRouter } from "next/navigation";
 import axios from "axios";
