@@ -87,6 +87,29 @@ export const assetProcessingJobRelations = relations(
   })
 );
 
+export const promptsTable = pgTable("prompts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projectsTable.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  prompt: text("prompt"),
+  tokenCount: integer("token_count").default(0),
+  order: integer("order").notNull(), // add re-order later
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const promptsRelations = relations(promptsTable, ({ one }) => ({
+  project: one(projectsTable, {
+    fields: [promptsTable.projectId],
+    references: [projectsTable.id],
+  }),
+}));
+
 // Types
 export type InsertProject = typeof projectsTable.$inferInsert;
 export type Project = typeof projectsTable.$inferSelect;
@@ -95,10 +118,3 @@ export type InsertAsset = typeof assetTable.$inferInsert;
 export type AssetProcessingJob = typeof assetProcessingJobTable.$inferSelect;
 export type InsertAssetProcessingJob =
   typeof assetProcessingJobTable.$inferInsert;
-
-export const videoTable = pgTable("videos", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  assetId: uuid("asset_id")
-    .notNull()
-    .references(() => assetTable.id, { onDelete: "cascade" }),
-});
