@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import aiohttp
+import tiktoken
 from asset_processing_service.config import HEADERS, config
 from asset_processing_service.models import Asset, AssetProcessingJob
 
@@ -87,3 +88,26 @@ async def fetch_asset_file(file_url: str) -> bytes:
     except aiohttp.ClientError as error:
         print(f"Error fetching asset file: {error}")
         raise ApiError("Failed to fetch asset file", status_code=500)
+
+
+async def update_asset_content(asset_id: str, content: str) -> None:
+    try:
+        encoding = tiktoken.encoding_for_model("gpt-4o")
+        tokens = encoding.encode(content)
+        token_count = len(tokens)
+
+        update_data = {
+            "content": content,
+            "tokenCount": token_count,
+        }
+
+        async with aiohttp.ClientSession() as session:
+            url = f"{config.API_BASE_URL}/asset?assetId={asset_id}"
+            async with session.patch(
+                url, json=update_data, headers=HEADERS
+            ) as response:
+                response.raise_for_status()
+
+    except aiohttp.ClientError as error:
+        print(f"Failed to update asset content for asset {asset_id}: {error}")
+        raise ApiError("Failed to update asset content", status_code=500)
