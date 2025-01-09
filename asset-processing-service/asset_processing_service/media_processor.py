@@ -228,6 +228,7 @@ async def transcribe_chunks(chunks: List[dict]) -> List[str]:
 
     # Extract the 'content' from the sorted results
     transcribed_texts = [chunk["content"] for chunk in transcribed_chunks]
-    logger.info("Transcription content extracted from transcribed chunks.")
+
+    logger.info("Transcription content extracted from transcribed chunks: ")
 
     return transcribed_texts
