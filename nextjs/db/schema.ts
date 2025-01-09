@@ -118,3 +118,5 @@ export type InsertAsset = typeof assetTable.$inferInsert;
 export type AssetProcessingJob = typeof assetProcessingJobTable.$inferSelect;
 export type InsertAssetProcessingJob =
   typeof assetProcessingJobTable.$inferInsert;
+export type Prompt = typeof promptsTable.$inferSelect;
+export type InsertPrompt = typeof promptsTable.$inferInsert;
