@@ -1,21 +1,20 @@
-# Use the official Python image as the base image
+# Use an official Python runtime as a parent image
 FROM python:3.13-slim
 
-# TODO: INSTALL VIDEO EDITING TOOLS - whisper
+RUN apt-get update && apt-get install -y ffmpeg 
 
-# Set the working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy the pyproject.toml and poetry.lock files for dependency caching
-COPY pyproject.toml poetry.lock* ./
+# Copy pyproject.toml and poetry.lock first for dependency caching
+COPY pyproject.toml poetry.lock* /app/
 
-# Install  Poetry the dependencies
-RUN pip install poetry
-RUN poetry install --no-root
+# Install Poetry and dependencies
+RUN pip install poetry \
+    && poetry install --no-root
 
-# Copy the rest of the application code
+# Copy the entire project into the container
 COPY . /app
 
-# Run the asset-processing-service
+# Run the service when the container launches
 CMD ["poetry", "run", "asset-processing-service"]
-
