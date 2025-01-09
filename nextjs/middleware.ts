@@ -5,8 +5,10 @@ const isPublicRoute = createRouteMatcher(["/", "/pricing", "/api/upload"]);
 
 // Define secure routes that require service worker authentication
 // These routes are only accessible with a valid SERVER_API_KEY
-const isSecureRoute = createRouteMatcher(["/api/asset-processing-job"]);
-
+const isSecureRoute = createRouteMatcher([
+  "/api/asset-processing-job",
+  "/api/asset",
+]);
 // Get the server API key from environment variables
 // This key is used to authenticate service worker requests
 const SERVER_API_KEY = process.env.SERVER_API_KEY;
