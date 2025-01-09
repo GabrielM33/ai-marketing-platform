@@ -13,7 +13,7 @@ class AssetProcessingJob(BaseModel):
     attempts: int
     createdAt: datetime
     updatedAt: datetime
-    lastHeartbeatAt: datetime
+    lastHeartBeat: datetime
     errorMessage: Optional[str] = None
 
 
