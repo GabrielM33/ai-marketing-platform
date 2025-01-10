@@ -3,11 +3,12 @@ import { getTemplate } from "@/server/queries";
 import { notFound } from "next/navigation";
 import React from "react";
 
-export default async function TemplatePage({
-  params,
-}: {
-  params: { templateId: string };
-}) {
+export default async function TemplatePage(
+  props: {
+    params: Promise<{ templateId: string }>;
+  }
+) {
+  const params = await props.params;
   const template = await getTemplate(params.templateId);
 
   if (!template) {

@@ -1,5 +1,5 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
+import { cookies, type UnsafeUnwrappedCookies } from "next/headers";
 
 export const createClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -12,7 +12,7 @@ export const createClient = () => {
     },
     global: {
       headers: {
-        Cookie: cookies().toString(),
+        Cookie: (cookies() as unknown as UnsafeUnwrappedCookies).toString(),
       },
     },
   });

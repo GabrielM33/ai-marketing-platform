@@ -17,10 +17,8 @@ const updatePromptSchema = newPromptSchema.extend({
   id: z.string().uuid(),
 });
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ projectId: string }> }) {
+  const params = await props.params;
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -53,10 +51,8 @@ export async function POST(
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ projectId: string }> }) {
+  const params = await props.params;
   const projectId = params.projectId;
 
   if (!projectId) {
@@ -81,10 +77,8 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { projectId: string } }
-) {
+export async function DELETE(request: Request, props: { params: Promise<{ projectId: string }> }) {
+  const params = await props.params;
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -126,10 +120,8 @@ export async function DELETE(
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ projectId: string }> }) {
+  const params = await props.params;
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

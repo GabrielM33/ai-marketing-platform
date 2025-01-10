@@ -4,10 +4,8 @@ import { getAuth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { templateId: string } }
-) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ templateId: string }> }) {
+  const params = await props.params;
   const { userId } = getAuth(req);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -49,10 +47,8 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { templateId: string } }
-) {
+export async function DELETE(req: NextRequest, props: { params: Promise<{ templateId: string }> }) {
+  const params = await props.params;
   const { userId } = getAuth(req);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

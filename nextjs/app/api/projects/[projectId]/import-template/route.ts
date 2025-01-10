@@ -4,10 +4,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { projectId: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ projectId: string }> }) {
+  const params = await props.params;
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
