@@ -12,7 +12,7 @@ export const createClient = () => {
     },
     global: {
       headers: {
-        Cookie: (cookies() as unknown as UnsafeUnwrappedCookies).toString(),
+        Cookie: ((cookies() as unknown as UnsafeUnwrappedCookies) as unknown as UnsafeUnwrappedCookies).toString(),
       },
     },
   });
