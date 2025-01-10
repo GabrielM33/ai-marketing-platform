@@ -1,20 +1,20 @@
 "use client";
 
 import React from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { LayoutTemplate, Loader2, Plus } from "lucide-react";
 
-interface ConfigurePromptsStepHeaderProps {
+interface ConfigurePromptStepHeaderProps {
   isCreatingPrompt: boolean;
   isImportingTemplate: boolean;
   handlePromptCreate: () => void;
 }
 
-function ConfigurePromptsStepHeader({
+function ConfigurePromptStepHeader({
   handlePromptCreate,
   isCreatingPrompt,
   isImportingTemplate,
-}: ConfigurePromptsStepHeaderProps) {
+}: ConfigurePromptStepHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row items-start justify-between">
       <h2 className="text-xl md:text-2xl lg:text-2xl font-bold mb-4 sm:mb-0">
@@ -48,4 +48,4 @@ function ConfigurePromptsStepHeader({
   );
 }
 
-export default ConfigurePromptsStepHeader;
+export default ConfigurePromptStepHeader;
