@@ -2,8 +2,8 @@
 
 import { Prompt } from "@/db/schema";
 import React, { useEffect, useState } from "react";
-import { Card, CardContent } from "./ui/card";
-import { Button } from "./ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { MessageSquare, Trash2 } from "lucide-react";
 import { formatTokens, getPromptTokenCount } from "@/utils/token-helper";
 import { MAX_TOKENS_PROMPT } from "@/lib/constants";
@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./ui/tooltip";
+} from "@/components/ui/tooltip";
 
 interface PromptContainerCardProps {
   prompt: Prompt;
