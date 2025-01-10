@@ -4,17 +4,17 @@ import React from "react";
 import { Button } from "./ui/button";
 import { LayoutTemplate, Loader2, Plus } from "lucide-react";
 
-interface ConfigurePromptStepHeaderProps {
+interface ConfigurePromptsStepHeaderProps {
   isCreatingPrompt: boolean;
   isImportingTemplate: boolean;
   handlePromptCreate: () => void;
 }
 
-function ConfigurePromptStepHeader({
+function ConfigurePromptsStepHeader({
   handlePromptCreate,
   isCreatingPrompt,
   isImportingTemplate,
-}: ConfigurePromptStepHeaderProps) {
+}: ConfigurePromptsStepHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row items-start justify-between">
       <h2 className="text-xl md:text-2xl lg:text-2xl font-bold mb-4 sm:mb-0">
@@ -48,4 +48,4 @@ function ConfigurePromptStepHeader({
   );
 }
 
-export default ConfigurePromptStepHeader;
+export default ConfigurePromptsStepHeader;
