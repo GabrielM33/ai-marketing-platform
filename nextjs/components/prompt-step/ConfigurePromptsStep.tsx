@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import ConfirmationModal from "./ConfirmationModal";
+import ConfirmationModal from "../ConfirmationModal";
 import ConfigurePromptsStepHeader from "./ConfigurePromptStepHeader";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { Prompt } from "@/db/schema";
 import toast from "react-hot-toast";
 import PromptList from "./PromptList";
+import PromptEditorDialog from "./PromptEditorDialog";
 
 interface ConfigurePromptsStepProps {
   projectId: string;
@@ -15,15 +16,27 @@ interface ConfigurePromptsStepProps {
 
 function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [isImportingTemplate, setIsImportingTemplate] = useState(false);
   const [isCreatingPrompt, setIsCreatingPrompt] = useState(false);
   const [deletePromptId, setDeletePromptId] = useState<string | null>(null);
+  const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
 
   console.log("DELETE PROMPT ID", deletePromptId);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const promptId = searchParams.get("promptId");
+    if (promptId) {
+      setSelectedPrompt(prompts.find((p) => p.id === promptId) || null);
+    } else {
+      setSelectedPrompt(null);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchPrompts = async () => {
@@ -87,6 +100,32 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
     }
   };
 
+  const handlePromptUpdate = async (prompt: Prompt) => {
+    setIsSaving(true);
+    try {
+      const response = await axios.patch(
+        `/api/projects/${projectId}/prompts`,
+        prompt
+      );
+
+      setPrompts((prevPrompts) =>
+        prevPrompts.map((p) => (p.id === prompt.id ? response.data : p))
+      );
+      toast.success("Prompt updated successfully");
+      handleOnClose();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update prompt");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleOnClose = () => {
+    setSelectedPrompt(null);
+    router.push("?tab=prompts");
+  };
+
   return (
     <div className="space-y-4 md:space-x-6">
       <ConfigurePromptsStepHeader
@@ -107,9 +146,14 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
         onConfirm={() => deletePromptId && handlePromptDelete(deletePromptId)}
         isLoading={isDeleting}
       />
-      {/* This is the modal that will be shown when the user tries to delete a prompt */}
-      {/* <PromptContainerDialog /> */}
-      {/** This is where the user can edit and save changes to a prompt */}
+      <PromptEditorDialog
+        isOpen={!!selectedPrompt}
+        prompt={selectedPrompt}
+        handleOnClose={handleOnClose}
+        isSaving={isSaving}
+        handleSave={handlePromptUpdate}
+      />
+      {/** TODO:  This is where the user can edit and save changes to a prompt */}
       {/* <TemplateSectionPopup /> */}
     </div>
   );
