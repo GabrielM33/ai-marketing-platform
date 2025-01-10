@@ -11,7 +11,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import ProjectDetailBody from "./ProjectDetailBody";
 
 const ManageUploadStep = lazy(() => import("../upload-step/ManageUploadStep"));
-const ConfigurePromptsStep = lazy(() => import("../ConfigurePromptsStep"));
+const ConfigurePromptsStep = lazy(
+  () => import("../prompt-step/ConfigurePromptsStep")
+);
 const GenerateContentStep = lazy(() => import("./GenerateContentStep"));
 
 const steps = [
