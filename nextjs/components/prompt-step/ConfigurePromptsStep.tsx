@@ -5,7 +5,7 @@ import ConfirmationModal from "../ConfirmationModal";
 import ConfigurePromptsStepHeader from "./ConfigurePromptStepHeader";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
-import { Prompt } from "@/db/schema";
+import { Prompt } from "@/server/db/schema";
 import toast from "react-hot-toast";
 import PromptList from "./PromptList";
 import PromptEditorDialog from "./PromptEditorDialog";

@@ -1,5 +1,5 @@
-import { db } from "@/db";
-import { projectsTable } from "@/db/schema";
+import { db } from "@/server/db";
+import { projectsTable } from "@/server/db/schema";
 import { getAuth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";

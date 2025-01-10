@@ -5,7 +5,7 @@ import { Dialog, DialogTitle, DialogContent } from "@/components/ui/dialog";
 import { Loader2, MessageSquare, Save } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Prompt } from "@/db/schema";
+import { Prompt } from "@/server/db/schema";
 import { Button } from "@/components/ui/button";
 import { formatTokens, getPromptTokenCount } from "@/utils/token-helper";
 import { cn } from "@/lib/utils";

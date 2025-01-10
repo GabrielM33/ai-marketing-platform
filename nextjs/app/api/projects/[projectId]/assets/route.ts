@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/db/supabase";
+import { createClient } from "@/server/supabase";
 import { createClient as createStorageClient } from "@supabase/supabase-js";
 
 // Initialize Supabase storage client with service role for full access

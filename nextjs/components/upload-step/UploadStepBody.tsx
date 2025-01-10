@@ -1,6 +1,6 @@
 "use client";
 
-import { Asset } from "@/db/schema";
+import { Asset } from "@/server/db/schema";
 import React, { useEffect, useState } from "react";
 import { Skeleton } from "../ui/skeleton";
 import { AudioLines, FileMinus, Video, File, Dot, Trash } from "lucide-react";

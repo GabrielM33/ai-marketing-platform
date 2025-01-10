@@ -1,5 +1,5 @@
-import { db } from "@/db";
-import { assetProcessingJobTable } from "@/db/schema";
+import { db } from "@/server/db";
+import { assetProcessingJobTable } from "@/server/db/schema";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";

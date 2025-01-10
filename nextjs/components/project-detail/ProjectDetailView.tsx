@@ -1,6 +1,6 @@
 "use client";
 
-import { Project } from "@/db/schema";
+import { Project } from "@/server/db/schema";
 import React, { lazy, useEffect, useState } from "react";
 import ProjectDetailHeader from "./ProjectDetailHeader";
 import ProjectDetailStepper from "./ProjectDetailStepper";

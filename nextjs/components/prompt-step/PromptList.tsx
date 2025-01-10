@@ -1,4 +1,4 @@
-import { Prompt } from "@/db/schema";
+import { Prompt } from "@/server/db/schema";
 import React from "react";
 import PromptContainerCard from "./PromptContainerCard";
 import { Skeleton } from "../ui/skeleton";

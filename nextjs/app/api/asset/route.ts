@@ -1,5 +1,5 @@
-import { db } from "@/db";
-import { assetTable } from "@/db/schema";
+import { db } from "@/server/db";
+import { assetTable } from "@/server/db/schema";
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import z from "zod";

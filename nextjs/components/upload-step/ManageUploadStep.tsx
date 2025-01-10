@@ -6,7 +6,7 @@ import UploadStepBody from "./UploadStepBody";
 import ConfirmationModal from "../ConfirmationModal";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { Asset, AssetProcessingJob } from "@/db/schema";
+import { Asset, AssetProcessingJob } from "@/server/db/schema";
 
 interface ManageUploadStepProps {
   projectId: string;

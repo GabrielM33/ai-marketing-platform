@@ -1,5 +1,5 @@
-import { db } from "@/db";
-import { promptsTable } from "@/db/schema";
+import { db } from "@/server/db";
+import { promptsTable } from "@/server/db/schema";
 import { getPromptTokenCount } from "@/utils/token-helper";
 import { auth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
