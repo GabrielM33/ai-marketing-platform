@@ -18,15 +18,17 @@ const updatePromptSchema = newPromptSchema.extend({
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { templateId: string } }
+  { params }: { params: Promise<{ templateId: string }> }
 ) {
   const { userId } = getAuth(req);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { templateId } = await params;
+
   try {
     const prompts = await db.query.templatePromptsTable.findMany({
-      where: eq(templatePromptsTable.templateId, params.templateId),
+      where: eq(templatePromptsTable.templateId, templateId),
       orderBy: templatePromptsTable.order,
     });
     return NextResponse.json(prompts);
@@ -41,13 +43,13 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { templateId: string } }
+  { params }: { params: Promise<{ templateId: string }> }
 ) {
   const { userId } = getAuth(req);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const templateId = params.templateId;
+  const { templateId } = await params;
 
   try {
     const json = await req.json();
@@ -90,12 +92,13 @@ export async function POST(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { templateId: string } }
+  { params }: { params: Promise<{ templateId: string }> }
 ) {
   const { userId } = getAuth(req);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { templateId } = await params;
   const { searchParams } = new URL(req.url);
   const promptId = searchParams.get("id");
 
@@ -112,7 +115,7 @@ export async function DELETE(
       .where(
         and(
           eq(templatePromptsTable.id, promptId),
-          eq(templatePromptsTable.templateId, params.templateId)
+          eq(templatePromptsTable.templateId, templateId)
         )
       )
       .returning();
@@ -133,13 +136,13 @@ export async function DELETE(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { templateId: string } }
+  { params }: { params: Promise<{ templateId: string }> }
 ) {
   const { userId } = getAuth(req);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const templateId = params.templateId;
+  const { templateId } = await params;
 
   try {
     const json = await req.json();
