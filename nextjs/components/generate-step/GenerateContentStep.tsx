@@ -18,7 +18,7 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
   const [projectHasPrompts, setProjectHasPrompts] = useState(false);
   const [isAssetsTokenExceeded, setIsAssetsTokenExceeded] = useState(false);
   const [isPromptsTokenExceeded, setIsPromptsTokenExceeded] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent[]>(
     []
@@ -81,7 +81,7 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
 
         // Check to make sure we don't exceed prompt token limits
         for (const prompt of promptsResponse.data) {
-          if (prompt?.tokenCount ?? 0 > MAX_TOKENS_PROMPT) {
+          if ((prompt?.tokenCount ?? 0) > MAX_TOKENS_PROMPT) {
             setIsPromptsTokenExceeded(true);
             break;
           }
@@ -130,9 +130,66 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
     projectHasPrompts,
   ]);
 
+  useEffect(() => {
+    let pollingInterval: NodeJS.Timeout;
+
+    const fetchGeneratedContent = async () => {
+      try {
+        const response = await axios.get<GeneratedContent[]>(
+          `/api/projects/${projectId}/generated-content`
+        );
+
+        setGeneratedContent(response.data);
+        setGeneratedCount(response.data.length);
+
+        if (response.data.length === totalPrompts) {
+          clearInterval(pollingInterval);
+          setIsGenerating(false);
+          toast.success("Content generation complete");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to fetch generated content");
+      }
+    };
+
+    if (isGenerating) {
+      pollingInterval = setInterval(() => {
+        fetchGeneratedContent();
+      }, 1000);
+    }
+
+    // Clean up
+    return () => {
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+    };
+  }, [isGenerating, projectId, totalPrompts]);
+
+  const startGeneration = async () => {
+    setGeneratedContent([]);
+    setGeneratedCount(0);
+    try {
+      await axios.delete(`/api/projects/${projectId}/generated-content`);
+      setIsGenerating(true);
+
+      await axios.post<GeneratedContent[]>(
+        `/api/projects/${projectId}/generated-content`
+      );
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate content");
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div>
-      <GenerateStepHeader canGenerateContent={canGenerate} />
+      <GenerateStepHeader
+        canGenerateContent={canGenerate}
+        startGeneration={startGeneration}
+      />
       <GenerateStepBody
         isLoading={isLoading}
         isGenerating={isGenerating}
@@ -140,6 +197,8 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
         totalPrompts={totalPrompts}
         errorMessage={errorMessage}
         generatedContent={generatedContent}
+        projectId={projectId}
+        setGeneratedContent={setGeneratedContent}
       />
     </div>
   );
