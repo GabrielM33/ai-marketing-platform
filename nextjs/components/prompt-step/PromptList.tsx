@@ -1,7 +1,7 @@
 import { Prompt } from "@/db/schema";
 import React from "react";
 import PromptContainerCard from "./PromptContainerCard";
-import { Skeleton } from "./ui/skeleton";
+import { Skeleton } from "../ui/skeleton";
 import { useRouter } from "next/navigation";
 
 interface PromptListProps {
