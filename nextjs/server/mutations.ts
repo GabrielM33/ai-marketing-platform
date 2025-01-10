@@ -1,60 +1,41 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { createClient } from "@supabase/supabase-js";
-
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { db } from "./db";
+import { projectsTable, templatesTable } from "./db/schema";
+import { redirect } from "next/navigation";
 
 export async function createProject() {
-  const { userId: clerkId } = await auth();
+  //  Figure out who the user is
+  const { userId } = await auth();
 
-  if (!clerkId) {
+  // Verify the user exists
+  if (!userId) {
     throw new Error("User not found");
   }
 
-  // Get or create user mapping
-  const { data: userMapping } = await supabase
-    .from("users")
-    .select("id")
-    .eq("clerk_id", clerkId)
-    .single();
-
-  // If user mapping doesn't exist, create it
-  const finalUserMapping =
-    userMapping ||
-    (await supabase
-      .from("users")
-      .insert([{ clerk_id: clerkId }])
-      .select()
-      .single()
-      .then((res) => res.data));
-
-  if (!finalUserMapping) {
-    throw new Error("Failed to get or create user mapping");
-  }
-
   // Create project in database
-  const { data: newProject, error } = await supabase
-    .from("projects")
-    .insert([
-      {
-        title: "New Project",
-        user_id: finalUserMapping.id,
-      },
-    ])
-    .select()
-    .single();
+  const [newProject] = await db
+    .insert(projectsTable)
+    .values({
+      title: "New Project",
+      userId,
+    })
+    .returning();
 
-  if (error) {
-    throw new Error("Failed to create project: " + error.message);
+  redirect(`/project/${newProject.id}`);
+}
+
+export async function createTemplate() {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("User not found");
   }
 
-  return newProject;
+  const [newTemplate] = await db
+    .insert(templatesTable)
+    .values({ title: "New Template", userId })
+    .returning();
 
-  // TODO: LATER: redirect to detail view
-  // redirect => /projects/${newProject.id}
+  redirect(`/template/${newTemplate.id}`);
 }
