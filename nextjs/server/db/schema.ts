@@ -23,6 +23,7 @@ export const projectsTable = pgTable("projects", {
 export const projectsRelations = relations(projectsTable, ({ many }) => ({
   assets: many(assetTable),
   prompts: many(promptsTable),
+  generatedContent: many(generatedContentTable),
 }));
 
 export const assetTable = pgTable("assets", {
@@ -92,11 +93,13 @@ export const promptsTable = pgTable("prompts", {
   id: uuid("id").defaultRandom().primaryKey(),
   projectId: uuid("project_id")
     .notNull()
-    .references(() => projectsTable.id, { onDelete: "cascade" }),
+    .references(() => projectsTable.id, {
+      onDelete: "cascade",
+    }),
   name: text("name").notNull(),
   prompt: text("prompt"),
   tokenCount: integer("token_count").default(0),
-  order: integer("order").notNull(), // add re-order later
+  order: integer("order").notNull(), // Future us will add in re-order
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .notNull()
@@ -104,7 +107,7 @@ export const promptsTable = pgTable("prompts", {
     .$onUpdate(() => new Date()),
 });
 
-export const promptsRelations = relations(promptsTable, ({ one }) => ({
+export const promptRelations = relations(promptsTable, ({ one }) => ({
   project: one(projectsTable, {
     fields: [promptsTable.projectId],
     references: [projectsTable.id],
@@ -152,6 +155,33 @@ export const templatePromptsRelations = relations(
   })
 );
 
+export const generatedContentTable = pgTable("generated_content", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projectsTable.id, {
+      onDelete: "cascade",
+    }),
+  name: text("name").notNull(),
+  result: text("result").notNull(),
+  order: integer("order").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const GeneratedContentRelations = relations(
+  generatedContentTable,
+  ({ one }) => ({
+    project: one(projectsTable, {
+      fields: [generatedContentTable.projectId],
+      references: [projectsTable.id],
+    }),
+  })
+);
+
 // Types
 export type InsertProject = typeof projectsTable.$inferInsert;
 export type Project = typeof projectsTable.$inferSelect;
@@ -166,3 +196,5 @@ export type Template = typeof templatesTable.$inferSelect;
 export type InsertTemplate = typeof templatesTable.$inferInsert;
 export type TemplatePrompt = typeof templatePromptsTable.$inferSelect;
 export type InsertTemplatePrompt = typeof templatePromptsTable.$inferInsert;
+export type GeneratedContent = typeof generatedContentTable.$inferSelect;
+export type InsertGeneratedContent = typeof generatedContentTable.$inferInsert;
