@@ -191,7 +191,7 @@ export const stripeCustomerTable = pgTable("stripe_customers", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const subscriptionTable = pgTable("subscriptions", {
+export const subscriptionsTable = pgTable("subscriptions", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: varchar("user_id", { length: 50 }).notNull(),
   stripeSubscriptionId: varchar("stripe_subscription_id", { length: 100 })
@@ -218,5 +218,5 @@ export type GeneratedContent = typeof generatedContentTable.$inferSelect;
 export type InsertGeneratedContent = typeof generatedContentTable.$inferInsert;
 export type StripeCustomer = typeof stripeCustomerTable.$inferSelect;
 export type InsertStripeCustomer = typeof stripeCustomerTable.$inferInsert;
-export type Subscription = typeof subscriptionTable.$inferSelect;
-export type InsertSubscription = typeof subscriptionTable.$inferInsert;
+export type Subscription = typeof subscriptionsTable.$inferSelect;
+export type InsertSubscription = typeof subscriptionsTable.$inferInsert;
