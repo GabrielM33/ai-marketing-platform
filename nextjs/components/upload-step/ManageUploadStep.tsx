@@ -53,7 +53,7 @@ function ManageUploadStep({ projectId }: ManageUploadStepProps) {
   const fetchAssetProcessingJobs = useCallback(async () => {
     try {
       const response = await axios.get<AssetProcessingJob[]>(
-        `/api/projects/${projectId}/asset-processing-job`
+        `/api/projects/${projectId}/asset-processing-jobs`
       );
 
       const newAssetJobStatus: Record<string, string> = {};
