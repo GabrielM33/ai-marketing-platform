@@ -28,7 +28,7 @@ export async function GET(
 
   try {
     // Initialize Supabase client for database operations
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Query all assets that belong to the specified project
     const { data: assets, error } = await supabase
@@ -76,7 +76,7 @@ export async function DELETE(
 
   try {
     // Initialize Supabase client for database operations
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // First, get the asset details to know the file path
     const { data: asset, error: fetchError } = await supabase
