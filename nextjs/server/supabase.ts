@@ -1,7 +1,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
-import { cookies, type UnsafeUnwrappedCookies } from "next/headers";
+import { cookies } from "next/headers";
 
-export const createClient = () => {
+export const createClient = async () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
@@ -12,7 +12,7 @@ export const createClient = () => {
     },
     global: {
       headers: {
-        Cookie: ((cookies() as unknown as UnsafeUnwrappedCookies) as unknown as UnsafeUnwrappedCookies).toString(),
+        Cookie: (await cookies()).toString(),
       },
     },
   });
