@@ -14,7 +14,9 @@ const ManageUploadStep = lazy(() => import("../upload-step/ManageUploadStep"));
 const ConfigurePromptsStep = lazy(
   () => import("../prompt-step/ConfigurePromptsStep")
 );
-const GenerateContentStep = lazy(() => import("./GenerateContentStep"));
+const GenerateContentStep = lazy(
+  () => import("../generate-step/GenerateContentStep")
+);
 
 const steps = [
   { name: "Upload Media", tab: "upload", component: ManageUploadStep },
